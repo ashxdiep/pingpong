@@ -2,18 +2,31 @@
 //define a constructor (how it is initialized)
 // then add functionality and then the world is your OYSTER
 
-let bubble;
+//what if you want to make special bubbles
+//you do this by adding stuff in the constructor
+
+let bubble1, let bubble2;
 
 function setup() {
   createCanvas(600, 400);
-  bubble = new Bubble();
+  bubble1 = new Bubble(200, 200, 40);
+  bubble2 = new Bubble(400,200, 20);
   print(bubble.x, bubble.y);
 }
 
+function draw(){
+  background(0);
+  bubble1.move();
+  bubble1.show();
+  bubble2.move();
+  bubble2.show();
+}
+
  class Bubble {
-   constructor () {
-     this.x = 200;
-     this.y = 150;
+   constructor (x, y, r ) {
+     this.x = x;
+     this.y = y;
+     this.r = r;
    }
 
    move(){
@@ -25,6 +38,6 @@ function setup() {
      stroke(225);
      strokeWeight(4);
      noFill();
-     ellipse(this.x, this.y, 24, 24);
+     ellipse(this.x, this.y, this.r * 2);
    }
  }
