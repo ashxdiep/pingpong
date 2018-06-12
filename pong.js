@@ -1,78 +1,30 @@
-//class to hold x and y properties
-class Vec {
-  constructor( x = 0, y = 0){
-    this.x = x;
-    this.y = y;
-  }
+//the basic idea here is to define the template or class,
+//define a constructor (how it is initialized)
+// then add functionality and then the world is your OYSTER
+
+let bubble;
+
+function setup() {
+  createCanvas(600, 400);
+  bubble = new Bubble();
+  print(bubble.x, bubble.y);
 }
 
-//data structures for rectangle
-class Rect {
-  constructor (w, h){
-    //position
-    this.pos = new Vec;
-    //size
-    this.size = new Vec(w, h);
-  }
-}
+ class Bubble {
+   constructor () {
+     this.x = 200;
+     this.y = 150;
+   }
 
+   move(){
+     this.x = this.x + random(-5, 5);
+     this.y = this.y + random(-5, 5);
+   }
 
-
-class Ball extends Rect {
-  constructor(){
-    //making the size under rect
-    super(10, 10);
-
-    //velocity
-    this.vel = new Vec;
-  }
-}
-
-//accessing the canvas
-const canvas = document.getElementById('pong');
-const context = canvas.getContext('2d');
-
-
-const ball = new Ball;
-
-ball.pos.x= 100;
-ball.pos.y = 50;
-
-ball.vel.x = 100;
-ball.vel.y = 100;
-
-console.log(ball);
-
-//how much time has elapsed from the last animation frame
-let lastTime;
-function callback(millis){
-  //if we have last time
-  if (lastTime){
-    //update and convert to whole seconds
-    update((millis - lastTime) / 1000);
-    lastTime = millis;
-    requestAnimationFrame(callback);
-  }
-}
-
-//updating Ball position
-function update(dt){
-  ball.pos.x += ball.vel.x * dt;
-  ball.pos.y += ball.vel.y * dt;
-
-  if (ball.pos.x < 0 || ball.pos.x > canvas.width){
-    ball.vel.x = -ball.vel.x;
-  }
-
-  if (ball.pos.y < 0 || ball.pos.y > canvas.height){
-    ball.vel.y = -ball.vel.y;
-  }
-
-  context.fillStyle = 'black';
-  context.fillRect(0 , 0, canvas.width, canvas.height);
-
-  context.fillStyle = 'white';
-  context.fillRect(ball.pos.x, ball.pos.y, ball.size.x, ball.size.y);
-}
-
-callback();
+   show(){
+     stroke(225);
+     strokeWeight(4);
+     noFill();
+     ellipse(this.x, this.y, 24, 24);
+   }
+ }
