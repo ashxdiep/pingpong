@@ -135,3 +135,39 @@ class Lava{
 }
 
 Lava.prototype.size = new Vec(1, 1);
+
+/***** COIN ACTORS CLASS *****/
+//Given a wobble: slight vertical back
+//stores a base position as well as wobble property that tracks phase of bounce
+//these determine the coin's actual position
+
+class Coin {
+  constructor(pos, basePos, wobble){
+    this.pos = pos;
+    this.basePos = basePos;
+    this.wobble = wobble;
+  }
+
+  get type(){ return "coin"; }
+
+  static create(pos){
+    let basePos = pos.plus(new Vec(0.2, 0.1));
+
+    //Math.sin gives us a wave form, don't want coins to move up and down
+    //synchronously, so multiply by a random number to give random starting
+    //position of the wave
+    return new Coin(basePos, basePos, Math.random()* Math.PI * 2);
+  }
+}
+
+Coin.prototype.size = new Vec(0.6, 0.6);
+
+//define levelChars objects that maps plan characters to backgroudn grid types
+//or actor classes
+const levelChars = {
+  ".": "empty", "#": "wall", "+" : "lava", 
+  "@": Player, "o": Coin, "=": Lava, "|": Lava, "v": Lava
+};
+
+let simpleLevel = new Level(simpleLevelPlan);
+console.log(`${simpleLevel.width} by ${simpleLevel.height}`)
