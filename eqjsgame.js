@@ -165,9 +165,38 @@ Coin.prototype.size = new Vec(0.6, 0.6);
 //define levelChars objects that maps plan characters to backgroudn grid types
 //or actor classes
 const levelChars = {
-  ".": "empty", "#": "wall", "+" : "lava", 
+  ".": "empty", "#": "wall", "+" : "lava",
   "@": Player, "o": Coin, "=": Lava, "|": Lava, "v": Lava
 };
 
 let simpleLevel = new Level(simpleLevelPlan);
 console.log(`${simpleLevel.width} by ${simpleLevel.height}`)
+
+
+
+//encapsulation of drawing code is done by defining display object (displays level and state)
+// use a style sheet to set the actual colors and other fixed properties of the elements
+
+//creating an element and give it some attributes and child nodes
+function elt(name, attrs, ...children){
+  let dom = document.createElement(name);
+  for (let attr of Object.keys(attrs)){
+    dom.setAttribute(attr, attrs[attr]);
+  }
+  for (let child of children){
+    dom.appendChild(child);
+  }
+  return dom;
+}
+
+//display created by giving it a parent element to which is should append
+//itself and a level object
+class DOMdisplay{
+  constructor(parent, level){
+    this.dom = elt("div", {class: "game"}, drawGrid(level));
+    this.actorLayer = null;
+    parent.appendChild(this.dom);
+  }
+
+  clear(){ this.dom.remove(); }
+}
