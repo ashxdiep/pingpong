@@ -47,6 +47,7 @@ class Level{
   }
 }
 
+//track the state of a running game
 class State {
   constructor(level, actors, status){
     this.level = level;
@@ -64,4 +65,73 @@ class State {
   }
 }
 
-//Actor objects: represent current position and state of a given moving element in game 
+//Actor objects: represent current position and state of a given moving element in game
+//conform to the same interface
+//update method: compute new state and position after a given time step ( moving in response to arrow keys)
+//type property: player, coin, or lava
+//create: creates an actor: coordinates of character and the character itself
+
+
+//Vec class: position asn size of startActors//times method:scales a vector by a given number
+//(useful to multiply a speed vector)
+class Vec{
+  constructor(x, y){
+    this.x = x;
+    this.y = y;
+  }
+
+  plus(other){
+    return new Vec(this.x + other.x, this.y + other.y);
+  }
+  times(factor){
+    return new Vec(this.x * factor, this.y * factor);
+  }
+}
+
+/******PLAYER CLASS *****/
+//Has speed to stimulate gravity and such
+class Player {
+  constructor (pos, speed){
+    this.pos = pos;
+    this.speed = speed;
+  }
+
+  get type (){
+    return "player";
+  }
+
+  //because player is 1.5 squares hight, inital position is set to be
+  //half a square above the position where the @ character appeared
+  static create (pos){
+    return new Player (pos.plus(new Vec (0, -0.5)), new Vec (0,0));
+  }
+}
+
+//size is same for all players, so it is a protoype
+Player.prototype.size = new Vec (0.8, 1.5);
+
+/***** LAVA CLASS *****/
+//dynamic lava moves along at its current speed until it hits an obstacle
+//can either drip (start at beginning) or bounce (invert and bounce to other direction)
+
+class Lava{
+  constructor (pos, speed, reset){
+    this.pos = pos;
+    this.speed = speed;
+    this.reset = reset;
+  }
+
+  get type(){ return "lava"; }
+
+  static create (pos, ch){
+    if (ch == "="){
+      return new Lava(pos, new Vec(2, 0));
+    } else if (ch == "|") {
+      return new Lava(pos, new Vec(0, 2));
+    } else if (ch == "v"){
+      return new Lava(pos, new Vec (0,3), pos);
+    }
+  }
+}
+
+Lava.prototype.size = new Vec(1, 1);
