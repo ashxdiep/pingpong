@@ -200,3 +200,73 @@ class DOMdisplay{
 
   clear(){ this.dom.remove(); }
 }
+
+const scale = 20;
+
+//background drawn as a table element
+//each row of grid is turned into a table row element
+//strings are used as class names for the table cell td elements
+//triple dot operator is used to passs arrays of child nodes to elt as separate arguments
+function drawGrid(level){
+  return elt("table", {
+    class: "background",
+    style: `width: ${level.width * scale }px`
+  }, ...level.rows.map(row =>
+    let("tr", {style: `height: ${scale}px`},
+    ...row.map(type => elt("td", {class: type})))
+  ));
+}
+
+
+//drawing each actor by creating a DOM elements
+//setting element's position and size based on actor's properties
+//values bultipled by scale to go from game units to pixels
+function drawActors(actors) {
+  return elt("div", {}, ...actors.map(actor => {
+    let rect = elt("div", {class: `actor ${actor.type}`});
+    rect.style.width = `${actor.size.x * scale}px`;
+    rect.style.height = `${actor.size.y * scale}px`;
+    rect.style.left = `${actor.pos.x * scale}px`;
+    rect.style.top = `${actor.pos.y * scale}px`;
+    return rect;
+  }));
+}
+
+//asdding current status as class name, we can style the player when the game
+//is lost or won.
+DOMDisplay.prototype.syncState = function(state){
+  if (this.actorLayer) this.actorLayer.remove();
+  this.actorLayer = drawActors(state.actors);
+  this.dom.appendChild(this.actorLayer);
+  this.dom.className = `game ${state.status}`;
+  //can't always assume that level fits into the viewport
+  //if level is protruding outside viewport, we scroll that viewport to make sure player is in center
+  this.scrollPlayerIntoView(state);
+}
+
+//find player's position and update the wrapping element's scroll position
+//manipulat scrolllLeft and scrollTop properties
+DOMDisplay.prototype.scrollPlayerIntoView = function(state){
+  let width = this.dom.clientWidth;
+  let height = this.dom.clientHeight;
+  let margin = width / 3;
+
+  //viewport
+  let left = this.dom.scrollLeft, right = left + width;
+  let top = this.dom.scrollTop, bottom = top + height;
+
+  let player = state.player;
+  let center = player.pos.plus(player.size.times(0.5)).times(scale);
+
+  if (center.x < left + margin){
+    this.dom.scrollLeft = center.x - margin;
+  } else if (center.x > right. - margin){
+    this.dom.scrollLeft = center.x + margin - width;
+  }
+
+  if (center.y < top + margin){
+    this.dom.scrollTop = center.y - margin;
+  } else if (center.y > botton - margin){
+    this.dom.scrollTop = center.y + margin - height;
+  }
+}

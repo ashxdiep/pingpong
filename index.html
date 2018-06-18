@@ -4,12 +4,16 @@
 
   <link rel="stylesheet" href="game.css">
 
+  <script>
+    let simpleLevel = new Level(simpleLevelPlan);
+    let display = new DOMDisplay(document.body, simpleLevel);
+    display.syncState(State.start(simpleLevel));
+  </script>
+
 </head>
 
 <body>
   <canvas id = 'pong' width = '600' height '400' />
-  <!-- <script src = 'pong.js'></script> -->
-  <script src = 'eqjsgame.js'></script>
-</body>
+
 
 </html>
