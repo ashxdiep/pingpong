@@ -255,9 +255,11 @@ DOMDisplay.prototype.scrollPlayerIntoView = function(state){
   let left = this.dom.scrollLeft, right = left + width;
   let top = this.dom.scrollTop, bottom = top + height;
 
+  //finding coordinates adn then translating it to pixels
   let player = state.player;
   let center = player.pos.plus(player.size.times(0.5)).times(scale);
 
+  //now we make sure that the player position isn't outside of the allowed range
   if (center.x < left + margin){
     this.dom.scrollLeft = center.x - margin;
   } else if (center.x > right. - margin){
@@ -270,3 +272,78 @@ DOMDisplay.prototype.scrollPlayerIntoView = function(state){
     this.dom.scrollTop = center.y + margin - height;
   }
 }
+
+
+
+/****** COLLISION AND MOVEMENT ******/
+
+
+//Method tells us whether a rectangle touches a grid element of the given type
+Level.prototype.touches = function(pos, size, type){
+  //computes the set of grid squares the the body overlaps
+  //get the range of backgroudn squares the box touches
+  var xStart = Math.floor(pos.x);
+  var xEnd = Math.ceil(pos.x + size.x);
+  var yStart = Math.floor(pos.y);
+  var yEnd = Math.ceil(pos.y + size.y);
+
+  //loop over block of grid squares foudn by rounding the coordinates
+  // return true if a matching square is found
+  for ( var y = yStart; y < yEnd; y++){
+    for (var x = xStart; x < xEnd; x++){
+      let isOutisde = x < 0 || x >= this.width || y < 0  || y >= this.height;
+      let here = isOutside ? "wall" : this.rows[y][x];
+      if (here == type) return true;
+    }
+    return false;
+  }
+}
+
+//This will figure out whether the player is touching lava
+
+//method is passed a time step and data strucute that tells it which keys are being held down
+State.prototype.update = function(time, keys){
+  //produce array of updated actors
+  let actors = this.actors.map(actor => actor.update(time, this, keys));
+  let newState = new State(this.level, actors, this.status);
+
+  //if game over, no processing has to be done
+  if (newState.status != "playing") return newState;
+
+  //see if touching lava
+  let player = newState.player;
+  if (this.level.touches(player.pos, player.size, "lava")){
+    return new State (this.level, actors, "lost");
+  }
+
+  //overlap beetween actors : (both overlap along x-axis and y-axis)
+  for (let actor of actors){
+    if (actor != player && overlap(actor, player)){
+      newState = actor.collide(newState);
+    }
+  }
+  return newState;
+};
+
+//checking for overlap
+function overlap(actor1, actors2){
+  return actor1.pos.x + actor1.size.x > actor2.pos.x &&
+         actor1.pos.x < actor2.pos.x + actor2.size.x &&
+         actor1.pos.y + actor1.size.y > actor2.pos.y &&
+         actor1.pos.y < actor2.pos.y + actor2.size.y;
+}
+
+//if does overlap, check collision rules
+//touching lava: lost
+// touching coins: vanish coins
+// if last coin touched: win level 
+Lava.prototype.collide = function(state){
+  return new State(state.level, state.actors, "lost");
+};
+
+Coin.prototype.collide = function(state){
+  let filtered = state.actors.filter(a => a != this);
+  let status = state.status;
+  if (!filtered.some(a => a.type == "coin" )) status = "won";
+  return new State(state.level, filtered, status);
+};
