@@ -336,7 +336,7 @@ function overlap(actor1, actors2){
 //if does overlap, check collision rules
 //touching lava: lost
 // touching coins: vanish coins
-// if last coin touched: win level 
+// if last coin touched: win level
 Lava.prototype.collide = function(state){
   return new State(state.level, state.actors, "lost");
 };
@@ -346,4 +346,63 @@ Coin.prototype.collide = function(state){
   let status = state.status;
   if (!filtered.some(a => a.type == "coin" )) status = "won";
   return new State(state.level, filtered, status);
+};
+
+//Actor update methods take arguments the time step, state object, and keys obj
+// lava actor type ignores key objects
+Lava.protoype.update = function(time, state){
+  let newPos = this.pos.plus(this.speed.times(time));
+  if(!state.level.touches(newPos, this.size, "wall")){
+    return new Lava(newPos, this.size, "wall")){
+      return new Lava (newPos, this.speed, this.reset);
+    } else if (this.reset){
+      return new Lava(this.reset, this.speed, this.reset);
+    } else {
+      return new Lava(this.pos, this.speed.times(-1));
+    }
+  };
+}
+
+//coins use update method to wobble: ignore collisions with grid since
+//the are simply wobbling around inside of own square
+const wobbleSpeed = 8, wobbleDist = 0.07;
+Coin.prototype.update = function(time){
+  let wobble = this.wobble + time * wobbleSpeed;
+  let wobblePos = Math.sin(wobble) * wobbleDist;
+  return new Coin (this.basePos.plus(new Vec(0, wobblePos)), this.basePos, wobble);
+}
+
+
+//Player motion: hitting floor should not prevent horizontal motion
+// hitting wall should not stop falling or jumping
+
+const playerXSpeed = 7;
+const gravity = 30;
+const jumpSpeed = 17;
+
+Player.prototype.update = function(time, state, keys){
+  //horizontal motional based of left and right arrow keys
+  // if no wall blocking, this is used otherwise old position kept
+  let xSpeed = 0;
+  if (keys.ArrowLeft) xSpeed = playerXSpeed;
+  if (keys.ArrowRight) xSpeed += playerXSpeed;
+  let pos = this.pos;
+  let movedX = pos.plus(new Vec(xSpeed * time, 0));
+  if (!state.level.touches(movedX, this.size, "wall")){
+    pos = movedX;
+  }
+
+  // vertical speed accounts gravity
+  let ySpeed = this.speed.y + time * gravity;
+  let movedY = pos.plus(new Vec(0, ySpeed * time));
+  if (!state.level.touches(movedY, this.size, "wall")){
+    pos = movedY;
+    //something bottom of us
+  } else if (keys.ArrowUp && ySpeed > 0){
+    ySpeed = -jumpSpeed;
+    // else bumped into something
+  } else {
+    ySpeed = 0;
+  }
+  return new Player(pos, new Vec(xSpeed, ySpeed));
 };
